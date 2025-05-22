@@ -28,12 +28,12 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Animations")
 	TObjectPtr<UAnimMontage> DodgeMontage;
 	/**
-	 * Rate at which attacks can be performed (attacks per second)
+	 * Animation rate of the attack montage
 	 */
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	float AttackRate = 2.0f;
 	/**
-	 * Rate at which dodges can be performed (dodges per second)
+	 * Animation rate of the dodge montage
 	 */
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	float DodgeRate = 2.0f;
