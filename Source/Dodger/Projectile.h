@@ -11,6 +11,8 @@ class UProjectileConfig;
 class USphereComponent;
 class UProjectileMovementComponent;
 
+using FOnProjectileHitDelegate = TMulticastDelegate<void(AProjectile* Projectile, const FHitResult& ImpactResult)>;
+
 UCLASS()
 class DODGER_API AProjectile : public AActor
 {
@@ -19,6 +21,14 @@ class DODGER_API AProjectile : public AActor
 public:
 	AProjectile();
 
+	void Activate();
+	
+	void Deactivate();
+	
+	bool IsActive() const { return bIsActive; }
+	
+	FOnProjectileHitDelegate OnProjectileHitDelegate;
+	
 protected:
 	// Start Base Interface
 	virtual void PostInitializeComponents() override;
@@ -48,5 +58,7 @@ private:
 	
 	UPROPERTY(EditAnywhere, NoClear)
 	TObjectPtr<const UProjectileConfig> Config;
+
+	bool bIsActive = false;
 	
 };

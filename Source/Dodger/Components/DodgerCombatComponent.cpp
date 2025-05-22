@@ -6,6 +6,7 @@
 #include "Dodger/EnemyAIController.h"
 #include "Dodger/HitValidationTypes.h"
 #include "Dodger/Projectile.h"
+#include "Dodger/ProjectileManager.h"
 #include "Dodger/Data/CombatConfig.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -243,6 +244,8 @@ void UDodgerCombatComponent::PerformDodge()
 			OwningCharacter->StopAnimMontage(Config->AttackMontage);
 		}
 
+		OwningCharacter->SetActorRotation(Direction.ToOrientationQuat());
+		
 		// Play dodge animation
 		OwningCharacter->PlayAnimMontage(Config->DodgeMontage, Config->DodgeRate);
 		
@@ -393,11 +396,8 @@ void UDodgerCombatComponent::EvaluateAimOriginAndTarget(FVector& AimOrigin, FVec
 
 void UDodgerCombatComponent::HandleSpawnProjectile(const FVector& AimOrigin, const FVector& AimTarget)
 {
-	FActorSpawnParameters Params;
-	Params.Instigator = Cast<APawn>(GetOwner());
 	FVector Dir = (AimTarget - AimOrigin).GetSafeNormal();
-	//TODO: pull from pool
-	GetWorld()->SpawnActor<AProjectile>(Config->ProjectileClass, AimOrigin, Dir.Rotation(), Params);
+	UProjectileManager::Get(this)->LaunchProjectile(Config->ProjectileClass, AimOrigin, Dir.Rotation(), Cast<APawn>(GetOwner()));
 }
 
 ECombatState UDodgerCombatComponent::MontageToState(UAnimMontage* Montage) const

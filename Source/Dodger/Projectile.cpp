@@ -21,7 +21,8 @@ DEFINE_LOG_CATEGORY_STATIC(ProjectileLog, Log, All);
 AProjectile::AProjectile()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
+	PrimaryActorTick.bStartWithTickEnabled = false;
+	
 	if (!Config)
 	{
 		Config = GetDefault<UProjectileConfig>();
@@ -49,12 +50,38 @@ AProjectile::AProjectile()
 	ProjectileMovementComponent->InitialSpeed = Config ? Config->Speed : 3000.0f;
 	ProjectileMovementComponent->MaxSpeed = Config ? Config->Speed : 3000.0f;
 	ProjectileMovementComponent->ProjectileGravityScale = Config ? Config->GravityScale : 1.0f;
+	ProjectileMovementComponent->bAutoActivate = false;
+}
+
+void AProjectile::Activate()
+{
+	SetActorTickEnabled(true);
+	bIsActive = true;
+	SetActorHiddenInGame(false);
+	SetActorEnableCollision(true);
+	ProjectileMovementComponent->SetComponentTickEnabled(true);
+	ProjectileMovementComponent->Velocity = GetActorForwardVector() * Config->Speed;
+	ProjectileMovementComponent->SetUpdatedComponent(CollisionComponent);
+	ProjectileMovementComponent->UpdateComponentVelocity();
+	ProjectileMovementComponent->SetActive(true, true);
+	
+}
+
+void AProjectile::Deactivate()
+{
+	bIsActive = false;
+	SetActorHiddenInGame(true);
+	SetActorEnableCollision(false);
+	SetActorTickEnabled(false);
+	// Stop movement
+	ProjectileMovementComponent->StopMovementImmediately();
+	ProjectileMovementComponent->Deactivate();
 }
 
 void AProjectile::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-
+	
 	if (Config)
 	{
 		ProjectileMovementComponent->InitialSpeed = Config->Speed;
@@ -128,6 +155,8 @@ void AProjectile::PlayHitEffects()
 
 void AProjectile::OnProjectileHit(const FHitResult& ImpactResult)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, "Stop Movement");
+	
 	if (!GetInstigator())
 	{
 		UE_LOG(ProjectileLog, Warning, TEXT("Projectile %s: No instigator set."), *GetName());
@@ -148,7 +177,9 @@ void AProjectile::OnProjectileHit(const FHitResult& ImpactResult)
 	}
 	
 	PlayHitEffects();
+
+	OnProjectileHitDelegate.Broadcast(this, ImpactResult);
 	
-	Destroy();
+	//Destroy();
 }
 
