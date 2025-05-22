@@ -132,7 +132,7 @@ FCharacterFrameData UHitValidationComponent::InterpolateFrames(const FCharacterF
 
 	FCharacterFrameData InterpolatedFrame;
 	InterpolatedFrame.Timestamp = HitTime;
-	InterpolatedFrame.bIsInvulnerable = FMath::Abs(HitTime - OlderFrame.Timestamp) < FMath::Abs(HitTime - YoungerFrame.Timestamp) ? OlderFrame.bIsInvulnerable : YoungerFrame.bIsInvulnerable;
+	InterpolatedFrame.bIsInvulnerable = InterpAlpha > 0.5f ? YoungerFrame.bIsInvulnerable : OlderFrame.bIsInvulnerable;
 	InterpolatedFrame.Character = OlderFrame.Character;
 	
 	for (const auto& YoungerPair : YoungerFrame.HitboxData)
